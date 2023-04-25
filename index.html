@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>beacon</title>
+		<link rel="stylesheet" href="index.css">
+		<style>
+			.container {
+				width: 100vw;
+				height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			#dot {
+				width: 100px;
+				height: 100px;
+				border-radius: 50%;
+				border-width: 0px;
+				background-color: #000000;
+				visibility: hidden;
+			}
+
+			@keyframes bring-in {
+				0% {
+					opacity: 0;
+				}
+				50% {
+					opacity: 1;
+				}
+				100% {
+					opacity: 0;
+				}
+			}
+
+			@keyframes bring-in-stay {
+				0% {
+					opacity: 0;
+				}
+				100% {
+					opacity: 1;
+				}
+			}
+		</style>
+		<script>
+			
+			const ipc = require('electron').ipcRenderer;
+			//const remote = require('electron').remote;
+			const { shell } = require('electron');
+
+			const path = require('path');
+			
+			const config = require('./config');
+
+			var COLORS = [];
+
+			//IPCs
+			ipc.on('screenInfo', function(event, screenInfo) {
+				//console.log(screenInfo);
+			});
+
+			ipc.on('beacon', function(event, beaconObj) {
+				//get dot span
+				let dot = document.getElementById('dot');
+
+				if (!beaconObj.color) {
+					beaconObj.color = 'red';
+				}
+
+				//get the color obj
+				let colorObj = COLORS.find((color) => color.id == beaconObj.color);
+				if (colorObj) {
+					dot.style.backgroundColor = colorObj.hex;
+				}
+
+				if (!beaconObj.speed) {
+					beaconObj.speed = 0;
+				}
+				//now convert the speed value of 0-255 to a seconds value between 1 and 10 seconds
+				let speed = (beaconObj.speed / 255) * 9;
+
+				if (!beaconObj.repeat) {
+					beaconObj.repeat = 5;
+				}
+
+				dot.style.animation = 'none';
+				dot.style.visibility = 'visible';
+				dot.style.opacity = 0;
+
+				//determine the animation
+				switch(beaconObj.beaconType) {
+					case 'set':
+						dot.style.animation = 'none';
+						dot.style.opacity = 1;
+						break;
+					case 'fade':
+						dot.style.animation = `bring-in-stay ${speed}s linear 1`;
+						setTimeout(function() {
+							dot.style.opacity = 1;
+							dot.style.animation = 'none';
+						}, speed * 1000 + 50); //little bit of extra time to make sure it's fully visible
+						break;
+					case 'flash':
+						dot.style.animation = `bring-in ${speed}s linear ${beaconObj.repeat}`;
+						//have it disappear after the animation is done		
+						setTimeout(function() {
+							dot.style.opacity = 0;
+							dot.style.animation = 'none';
+						}, speed * 1000 * beaconObj.repeat);
+						break;
+					case 'off':
+					default:
+						dot.style.animation = 'none';
+						dot.style.opacity = 0;
+						break;
+				}	
+				
+			});
+
+			ipc.on('colors', function(event, colors) {
+				COLORS = colors;
+			});
+
+			ipc.on('sound', function(event, beaconObj, soundObj) {
+				//play the sound
+				//beaconObj will define the repeat and other properties
+				playSound(path.join(__dirname, 'static/' + soundObj.file), beaconObj.soundRepeat);
+			});
+
+			const playSound = (audioURL, playCount = 1) => {
+				const audioContext = new AudioContext();   
+				audioContext.resume();
+
+				let playCountArray = [];
+
+				for (let i = 0; i < playCount; i++) {
+					let soundInstance = new Audio(audioURL);
+					playCountArray.push(soundInstance);
+
+					if (playCountArray.length < playCount) {
+						playCountArray[i].addEventListener('ended', () => {playCountArray.shift(); playCountArray[0].play();});
+					}
+				}
+
+				playCountArray[0].play();
+			};
+
+
+
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<span id="dot"></span>
+		</div>
+	</body>
+</html>
