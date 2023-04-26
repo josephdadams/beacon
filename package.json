@@ -45,8 +45,8 @@
 		]
 	},
 	"np": {
-		"publish": true,
-		"releaseDraft": true
+		"publish": false,
+		"releaseDraft": false
 	},
 	"build": {
 		"appId": "com.josephadams.beacon",
