@@ -89,7 +89,7 @@ function detectBlink() {
 function buildContextMenu() {
 	let contextMenu = Menu.buildFromTemplate([
 		{
-			label: 'Version: ' + VERSION,
+			label: 'beacon: v' + VERSION,
 			enabled: false
 		},
 		{
