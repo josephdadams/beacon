@@ -1,7 +1,7 @@
 {
 	"name": "beacon",
 	"productName": "beacon",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Control a USB Busylight as a Beacon/Notification",
 	"license": "MIT",
 	"repository": "josephdadams/beacon",
