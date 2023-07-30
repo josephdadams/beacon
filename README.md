@@ -8,7 +8,7 @@ For API information, see [api.md](api.md).
 
 **macOS**
 
-[**Download**](https://github.com/josephdadams/spotify-controller/releases/latest) the `.dmg` file.
+[**Download**](https://github.com/josephdadams/beacon/releases/latest) the `.dmg` file.
 
 ---
 
