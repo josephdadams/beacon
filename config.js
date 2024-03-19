@@ -9,9 +9,6 @@ module.exports = new Store({
 		allowNotifications: true,
 		allowSounds: true,
 		allowOnScreenBeacon: true,
-		allowedEvents: [
-			
-		],
 		colors: [
 			{ id: 'red', label: 'Red', r: 255, g: 0, b: 0, hex: '#ff0000' },
 			{ id: 'green', label: 'Green', r: 0, g: 255, b: 0, hex: '#00ff00' },

@@ -1,6 +1,6 @@
 # beacon
 
-> Control a USB Busylight such as the Luxafor Flag or Thingm blink(1) as a Beacon/Notification via REST API or socket.io.
+> Control a USB Busylight such as the Luxafor Flag, Thingm blink(1), or Kuando Busylight as a Beacon/Notification via REST API or socket.io.
 
 For API information, see [api.md](api.md).
 

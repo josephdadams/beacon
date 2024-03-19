@@ -13,6 +13,9 @@ const luxafor = require('luxafor-api');
 //blink(1) library
 const blink1 = require('node-blink1');
 
+//busylight library
+const busylight = require('busylight');
+
 function setUpBeacons() {
 	global.DEVICES = [];
 	global.USB_DEVICES = 0;
@@ -20,6 +23,7 @@ function setUpBeacons() {
 	detectScreens();
 	detectLuxafor();
 	detectBlink();
+	detectBusylight();
 
 	buildContextMenu();
 
@@ -77,6 +81,40 @@ function detectBlink() {
 			blinkDevice.deviceType = 'blink1';
 			blinkDevice.deviceName = 'Blink(1) ' + (i+1);
 			global.DEVICES.push(blinkDevice);
+			global.USB_DEVICES++;
+		}
+	}
+	catch(error) {
+		//probably no blink(1) detected
+		console.log(error);
+	}
+}
+
+function detectBusylight() {
+	try {
+		let busylights = busylight.devices();
+		//loop through the devices and add them to the devices array
+		for (let i = 0; i < busylights.length; i++) {
+			//let busylightDevice = busylight.get(busylights[i].path);
+			let busylightDevice = busylight.get();
+			busylightDevice.path = busylights[i].path; //store the path for later use
+			busylightDevice.deviceId = 'busylight-' + (i+1); //busylight devices don't have a serial number
+			busylightDevice.deviceType = 'busylight';
+			busylightDevice.deviceName = 'Busylight ' + (i+1);
+
+			busylightDevice.defaultSettings = {
+				keepalive: true,      // If the busylight is not kept alive it will turn off after 30 seconds
+				color: 'white',       // The default color to use for light, blink and pulse
+				duration: 30 * 1000,  // The duration for a blink or pulse sequence
+				rate: 300,            // The rate at which to blink or pulse
+				degamma: true,        // Fix rgb colors to present a better light
+				tone: 'OpenOffice',   // Default ring tone
+				volume: 4             // Default volume
+			}; //store defaults to use later
+
+			busylightDevice.defaults(busylightDevice.defaultSettings); //set the defaults for the device
+			
+			global.DEVICES.push(busylightDevice);
 			global.USB_DEVICES++;
 		}
 	}
@@ -200,6 +238,9 @@ function engageBeacon(beaconObj) {
 					case 'blink1':
 						useBlink(global.DEVICES[i], beaconObj);
 						break;
+					case 'busylight':
+						useBusylight(global.DEVICES[i], beaconObj);
+						break;
 					case 'screen':
 						useScreen(global.DEVICES[i], beaconObj);
 						break;
@@ -225,34 +266,21 @@ function playSound(beaconObj) {
 	}
 }
 
-function subscribeToNotifications() { //system events that can notify the app of a system change - perhaps like USB device being plugged in
-	let allowedEvents = config.get('allowedEvents');
-	for (let i = 0; i < allowedEvents.length; i++) {
-		systemPreferences.subscribeNotification(allowedEvents[i], (event, userInfo) => {
-			processNotification(event, userInfo);
-		});
-	}
-}
-
-function processNotification(event, info) { //process the system event
-	try {
-		if (config.get('allowedEvents').includes(event)) {
-			//do the stuff with the things
-			switch(event) {
-				default:
-					break;
-			}
-		}
-	}
-	catch(error) {
-		console.log(error);
-	}
-}
-
 function useLuxafor(luxaforDevice, beaconObj) {
 	//make sure beaconObj has proper color and target property
 	if (!beaconObj.color) {
 		beaconObj.color = 'red';
+	}
+
+	if (beaconObj.color == 'custom') {
+		if (beaconObj.color_r && beaconObj.color_g && beaconObj.color_b) {
+			//convert rgb to hex
+			let hex = rgbToHex(beaconObj.color_r, beaconObj.color_g, beaconObj.color_b);
+			beaconObj.color = hex;
+		}
+		else if (beaconObj.hex) {
+			beaconObj.color = beaconObj.hex;
+		}
 	}
 
 	if (!beaconObj.target) {
@@ -303,17 +331,30 @@ function useLuxafor(luxaforDevice, beaconObj) {
 
 function useBlink(blinkDevice, beaconObj) {
 	//make sure beaconObj has proper color and target property
+	let colorObj = {};
+
 	if (!beaconObj.color) {
 		beaconObj.color = 'red';
 	}
 
-	let colorObj = global.COLORS.find(color => color.id == beaconObj.color); //find the color object
-
-	//if the color is not found, use the default color
-	if (!colorObj) {
-		colorObj = global.COLORS.find(color => color.id == 'red');
+	if (beaconObj.color == 'custom') {
+		if (beaconObj.color_r && beaconObj.color_g && beaconObj.color_b) {
+			//convert rgb to hex
+			colorObj = { r: beaconObj.color_r, g: beaconObj.color_g, b: beaconObj.color_b };
+		}
+		else if (beaconObj.hex) {
+			colorObj = hexToRgb(beaconObj.hex);
+		}
 	}
-	
+	else {
+		colorObj = global.COLORS.find(color => color.id == beaconObj.color); //find the color object
+
+		//if the color is not found, use the default color
+		if (!colorObj) {
+			colorObj = global.COLORS.find(color => color.id == 'red');
+		}
+	}
+
 	//invert the speed values for blink
 	if (beaconObj.speed) {
 		beaconObj.speed = 255 - beaconObj.speed;
@@ -362,6 +403,102 @@ function useBlink(blinkDevice, beaconObj) {
 	}
 }
 
+function useBusylight(busylightDevice, beaconObj) {
+	//make sure beaconObj has proper color and target property
+	let colorObj = {};
+
+	if (!beaconObj.color) {
+		beaconObj.color = 'red';
+	}
+
+	if (beaconObj.color == 'custom') {
+		if (beaconObj.color_r && beaconObj.color_g && beaconObj.color_b) {
+			//convert rgb to hex
+			colorObj = { r: beaconObj.color_r, g: beaconObj.color_g, b: beaconObj.color_b };
+		}
+		else if (beaconObj.hex) {
+			colorObj = hexToRgb(beaconObj.hex);
+		}
+	}
+	else {
+		colorObj = global.COLORS.find(color => color.id == beaconObj.color); //find the color object
+
+		//if the color is not found, use the default color
+		if (!colorObj) {
+			colorObj = global.COLORS.find(color => color.id == 'red');
+		}
+	}
+
+	try {
+		switch(beaconObj.beaconType) {
+			case 'set':
+			case 'fade': //couldn't really find a good way to fade this one
+				busylightDevice.light(colorObj.id);
+				break;
+			case 'flash':
+				if (!beaconObj.speed) {
+					beaconObj.speed = 20;
+				}
+	
+				if (!beaconObj.repeat) {
+					beaconObj.repeat = 5;
+				}
+
+				busylightDevice.pulse([colorObj.hex], beaconObj.speed);
+
+				//use the repeat like seconds and turn it off after the rate
+				setTimeout(function() {
+					busylightDevice.off();
+				}, beaconObj.repeat * 1000);
+
+				break;
+			case 'off':
+			default:
+				busylightDevice.off();
+				break;
+		}
+
+		if (beaconObj.playSound == true && config.get('allowSounds') == true) {
+			//play the sound
+
+			let tone = '';
+			let timeoutMs = 2000;
+
+			switch(beaconObj.soundId) {
+				case 'single':
+					tone = 'TelephoneNordic';
+					break;
+				case 'triple':
+					tone = 'TelephoneOriginal';
+					break;
+				case 'hey':
+					tone = 'Quiet';
+					break;
+				case 'hey-loud':
+					tone = 'TelephonePickMeUp';
+					break;
+			}
+
+			busylightDevice.ring(tone);
+			//set a timeout to turn it off after a few seconds
+			setTimeout(function() {
+				busylightDevice.ring(false);
+			}, timeoutMs);
+		}
+	}
+	catch(error) {
+		//unable to write to device for some reason
+		console.log(error);
+		showNotification(
+			{
+				title: 'Beacon Error',
+				body: `Unable to control busylight device: ${busylightDevice.deviceId}. Did it get disconnected?`,
+				showNotification: true
+			}
+		)
+	}
+}
+
 function useScreen(screenDevice, beaconObj) {
 	if (config.get('allowOnScreenBeacon')) {
 		switch(beaconObj.beaconType) {
@@ -380,8 +517,6 @@ function useScreen(screenDevice, beaconObj) {
 module.exports = {
 	startUp() {
 		setUpBeacons();
-
-		subscribeToNotifications(); //for system notifications to alert the app of changes like usb devices detected
 	},
 
 	showNotification(beaconObj) {

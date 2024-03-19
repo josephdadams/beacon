@@ -1,7 +1,7 @@
 {
 	"name": "beacon",
 	"productName": "beacon",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "Control a USB Busylight as a Beacon/Notification",
 	"license": "MIT",
 	"repository": "josephdadams/beacon",
@@ -20,6 +20,8 @@
 		"release": "np"
 	},
 	"dependencies": {
+		"busylight": "^0.6.0",
+		"csscolorparser": "^1.0.3",
 		"electron-context-menu": "^3.0.0",
 		"electron-debug": "^3.2.0",
 		"electron-positioner": "^4.1.0",
@@ -30,10 +32,11 @@
 		"express": "^4.18.1",
 		"luxafor-api": "^4.0.0",
 		"node-blink1": "^0.5.1",
+		"node-hid": "^2.1.2",
 		"socket.io": "^4.5.1"
 	},
 	"devDependencies": {
-		"electron": "^12.0.6",
+		"electron": "^26.1.0",
 		"electron-builder": "^23.0.2",
 		"np": "^7.5.0",
 		"xo": "^0.39.1"
