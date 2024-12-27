@@ -13,11 +13,6 @@
 	"build": {
 		"appId": "com.josephadams.beacon",
 		"productName": "beacon",
-		"files": [
-			"dist/**/*",
-			"public/**/*",
-			"assets/**/*"
-		],
 		"mac": {
 			"target": [
 				{
@@ -29,7 +24,7 @@
 				}
 			],
 			"category": "public.app-category.utilities",
-			"icon": "assets/tray-icon.png",
+			"icon": "static/icon.png",
 			"identity": "Joseph Adams (R2PY2DC3A4)",
 			"extendInfo": {
 				"NSApplicationSupportsSecureRestorableState": true,
@@ -42,7 +37,7 @@
 		},
 		"win": {
 			"target": "nsis",
-			"icon": "assets/icon.ico"
+			"icon": "static/icon.ico"
 		},
 		"linux": {
 			"target": "AppImage",
