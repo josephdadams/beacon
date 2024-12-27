@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"author": "Joseph Adams <joseph@josephadams.dev>",
 	"description": "Control a USB Busylight as a Beacon/Notification",
-	"main": "dist/main.js",
+	"main": "index.js",
 	"scripts": {
 		"start": "electron .",
 		"format": "prettier -w .",
