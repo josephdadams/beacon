@@ -1,23 +1,54 @@
 {
 	"name": "beacon",
-	"productName": "beacon",
-	"version": "0.2.0",
+	"version": "1.0.0",
+	"author": "Joseph Adams <joseph@josephadams.dev>",
 	"description": "Control a USB Busylight as a Beacon/Notification",
-	"license": "MIT",
-	"repository": "josephdadams/beacon",
-	"author": {
-		"name": "Joseph Adams",
-		"email": "josephdadams@gmail.com",
-		"url": "https://josephadams.dev"
-	},
+	"main": "dist/main.js",
 	"scripts": {
-		"postinstall": "electron-builder install-app-deps",
-		"lint": "xo",
-		"test": "npm run lint",
 		"start": "electron .",
-		"pack": "electron-builder --dir",
-		"dist": "electron-builder --macos --linux --windows",
-		"release": "np"
+		"format": "prettier -w .",
+		"lint:raw": "eslint --ext .ts --ext .js --ignore-pattern dist --ignore-pattern pkg",
+		"lint": "yarn lint:raw ."
+	},
+	"build": {
+		"appId": "com.josephadams.beacon",
+		"productName": "beacon",
+		"files": [
+			"dist/**/*",
+			"public/**/*",
+			"assets/**/*"
+		],
+		"mac": {
+			"target": [
+				{
+					"target": "dmg",
+					"arch": [
+						"x64",
+						"arm64"
+					]
+				}
+			],
+			"category": "public.app-category.utilities",
+			"icon": "assets/tray-icon.png",
+			"identity": "Joseph Adams (R2PY2DC3A4)",
+			"extendInfo": {
+				"NSApplicationSupportsSecureRestorableState": true,
+				"electronTeamId": "R2PY2DC3A4"
+			},
+			"hardenedRuntime": true,
+			"gatekeeperAssess": true,
+			"entitlements": "entitlements.mac.plist",
+			"entitlementsInherit": "entitlements.mac.plist"
+		},
+		"win": {
+			"target": "nsis",
+			"icon": "assets/icon.ico"
+		},
+		"linux": {
+			"target": "AppImage",
+			"icon": "static/icon.png"
+		},
+		"generateUpdatesFilesForAllChannels": false
 	},
 	"dependencies": {
 		"busylight": "^0.6.0",
@@ -36,41 +67,9 @@
 		"socket.io": "^4.5.1"
 	},
 	"devDependencies": {
-		"electron": "^26.1.0",
-		"electron-builder": "^23.0.2",
-		"np": "^7.5.0",
-		"xo": "^0.39.1"
-	},
-	"xo": {
-		"envs": [
-			"node",
-			"browser"
-		]
-	},
-	"np": {
-		"publish": false,
-		"releaseDraft": false
-	},
-	"build": {
-		"appId": "com.josephadams.beacon",
-		"mac": {
-			"category": "public.app-category.productivity",
-			"darkModeSupport": true
-		},
-		"dmg": {
-			"iconSize": 160,
-			"contents": [
-				{
-					"x": 180,
-					"y": 170
-				},
-				{
-					"x": 480,
-					"y": 170,
-					"type": "link",
-					"path": "/Applications"
-				}
-			]
-		}
+		"@electron/notarize": "^2.5.0",
+		"electron": "^33.2.1",
+		"electron-builder": "^25.1.8",
+		"prettier": "^3.3.3"
 	}
 }
