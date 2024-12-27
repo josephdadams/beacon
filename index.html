@@ -1,9 +1,9 @@
 <!doctype html>
 <html>
 	<head>
-		<meta charset="utf-8">
+		<meta charset="utf-8" />
 		<title>beacon</title>
-		<link rel="stylesheet" href="index.css">
+		<link rel="stylesheet" href="index.css" />
 		<style>
 			.container {
 				width: 100vw;
@@ -44,110 +44,114 @@
 			}
 		</style>
 		<script>
-			
-			const ipc = require('electron').ipcRenderer;
+			const ipc = require('electron').ipcRenderer
 			//const remote = require('electron').remote;
-			const { shell } = require('electron');
+			const { shell } = require('electron')
 
-			const path = require('path');
-			
-			const config = require('./config');
+			const path = require('path')
 
-			var COLORS = [];
+			const config = require('./config')
+
+			var COLORS = []
 
 			//IPCs
-			ipc.on('screenInfo', function(event, screenInfo) {
+			ipc.on('screenInfo', function (event, screenInfo) {
 				//console.log(screenInfo);
-			});
+			})
 
-			ipc.on('beacon', function(event, beaconObj) {
+			ipc.on('beacon', function (event, beaconObj) {
 				//get dot span
-				let dot = document.getElementById('dot');
+				let dot = document.getElementById('dot')
 
 				if (!beaconObj.color) {
-					beaconObj.color = 'red';
+					beaconObj.color = 'red'
 				}
 
 				//get the color obj
-				let colorObj = COLORS.find((color) => color.id == beaconObj.color);
+				let colorObj = COLORS.find((color) => color.id == beaconObj.color)
 				if (colorObj) {
-					dot.style.backgroundColor = colorObj.hex;
+					dot.style.backgroundColor = colorObj.hex
 				}
 
 				if (!beaconObj.speed) {
-					beaconObj.speed = 0;
+					beaconObj.speed = 0
 				}
 				//now convert the speed value of 0-255 to a seconds value between 1 and 10 seconds
-				let speed = (beaconObj.speed / 255) * 9;
+				let speed = (beaconObj.speed / 255) * 9
 
 				if (!beaconObj.repeat) {
-					beaconObj.repeat = 5;
+					beaconObj.repeat = 5
 				}
 
-				dot.style.animation = 'none';
-				dot.style.visibility = 'visible';
-				dot.style.opacity = 0;
+				dot.style.animation = 'none'
+				dot.style.visibility = 'visible'
+				dot.style.opacity = 0
 
 				//determine the animation
-				switch(beaconObj.beaconType) {
+				switch (beaconObj.beaconType) {
 					case 'set':
-						dot.style.animation = 'none';
-						dot.style.opacity = 1;
-						break;
+						dot.style.animation = 'none'
+						dot.style.opacity = 1
+						break
 					case 'fade':
-						dot.style.animation = `bring-in-stay ${speed}s linear 1`;
-						setTimeout(function() {
-							dot.style.opacity = 1;
-							dot.style.animation = 'none';
-						}, speed * 1000 + 50); //little bit of extra time to make sure it's fully visible
-						break;
+						dot.style.animation = `bring-in-stay ${speed}s linear 1`
+						setTimeout(
+							function () {
+								dot.style.opacity = 1
+								dot.style.animation = 'none'
+							},
+							speed * 1000 + 50,
+						) //little bit of extra time to make sure it's fully visible
+						break
 					case 'flash':
-						dot.style.animation = `bring-in ${speed}s linear ${beaconObj.repeat}`;
-						//have it disappear after the animation is done		
-						setTimeout(function() {
-							dot.style.opacity = 0;
-							dot.style.animation = 'none';
-						}, speed * 1000 * beaconObj.repeat);
-						break;
+						dot.style.animation = `bring-in ${speed}s linear ${beaconObj.repeat}`
+						//have it disappear after the animation is done
+						setTimeout(
+							function () {
+								dot.style.opacity = 0
+								dot.style.animation = 'none'
+							},
+							speed * 1000 * beaconObj.repeat,
+						)
+						break
 					case 'off':
 					default:
-						dot.style.animation = 'none';
-						dot.style.opacity = 0;
-						break;
-				}	
-				
-			});
+						dot.style.animation = 'none'
+						dot.style.opacity = 0
+						break
+				}
+			})
 
-			ipc.on('colors', function(event, colors) {
-				COLORS = colors;
-			});
+			ipc.on('colors', function (event, colors) {
+				COLORS = colors
+			})
 
-			ipc.on('sound', function(event, beaconObj, soundObj) {
+			ipc.on('sound', function (event, beaconObj, soundObj) {
 				//play the sound
 				//beaconObj will define the repeat and other properties
-				playSound(path.join(__dirname, 'static/' + soundObj.file), beaconObj.soundRepeat);
-			});
+				playSound(path.join(__dirname, 'static/' + soundObj.file), beaconObj.soundRepeat)
+			})
 
 			const playSound = (audioURL, playCount = 1) => {
-				const audioContext = new AudioContext();   
-				audioContext.resume();
+				const audioContext = new AudioContext()
+				audioContext.resume()
 
-				let playCountArray = [];
+				let playCountArray = []
 
 				for (let i = 0; i < playCount; i++) {
-					let soundInstance = new Audio(audioURL);
-					playCountArray.push(soundInstance);
+					let soundInstance = new Audio(audioURL)
+					playCountArray.push(soundInstance)
 
 					if (playCountArray.length < playCount) {
-						playCountArray[i].addEventListener('ended', () => {playCountArray.shift(); playCountArray[0].play();});
+						playCountArray[i].addEventListener('ended', () => {
+							playCountArray.shift()
+							playCountArray[0].play()
+						})
 					}
 				}
 
-				playCountArray[0].play();
-			};
-
-
-
+				playCountArray[0].play()
+			}
 		</script>
 	</head>
 	<body>
