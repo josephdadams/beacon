@@ -12,12 +12,25 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
+
     steps:
       - uses: actions/checkout@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
+
+      # 🔥 FIX: Force Python 3.11 for node-gyp
+      - name: Setup Python (node-gyp compatibility)
+        if: matrix.os == 'macos-latest'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Export Python for node-gyp
+        if: matrix.os == 'macos-latest'
+        run: echo "PYTHON=$(which python)" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: yarn install --production
