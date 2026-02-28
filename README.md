@@ -19,6 +19,6 @@ Built with [Electron](https://electronjs.org).
 ### Run
 
 ```
-$ npm install
-$ npm start
+$ yarn
+$ yarn start
 ```
