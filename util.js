@@ -255,14 +255,17 @@ function engageBeacon(beaconObj) {
 }
 
 function playSound(beaconObj) {
-	if (config.get('allowSounds')) {
-		if (beaconObj.playSound == true || beaconObj.beaconType == 'sound') {
-			//play the sound
-			let soundObj = global.SOUNDS.find((sound) => sound.id === beaconObj.soundId)
+	console.log(beaconObj)
+	if (beaconObj.deviceId.indexOf('screen') > -1 || beaconObj.deviceId == 'all') {
+		if (config.get('allowSounds')) {
+			if (beaconObj.playSound == true || beaconObj.beaconType == 'sound') {
+				//play the sound
+				let soundObj = global.SOUNDS.find((sound) => sound.id === beaconObj.soundId)
 
-			if (soundObj) {
-				//play the sound file
-				global.win.webContents.send('sound', beaconObj, soundObj)
+				if (soundObj) {
+					//play the sound file
+					global.win.webContents.send('sound', beaconObj, soundObj)
+				}
 			}
 		}
 	}
