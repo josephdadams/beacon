@@ -10,7 +10,6 @@ const VERSION = package_json.version
 
 var server = null
 var httpServer = null
-var io = null
 
 class API {
 	static start(port) {
@@ -18,7 +17,7 @@ class API {
 		server = express()
 
 		httpServer = new http.Server(server)
-		io = new socketio.Server(httpServer, { allowEIO3: true })
+		global.io = new socketio.Server(httpServer, { allowEIO3: true })
 
 		server.use(express.json()) //parse json in body
 
@@ -57,7 +56,7 @@ class API {
 			res.status(404).send({ error: true, url: req.originalUrl + ' not found.' })
 		})
 
-		io.sockets.on('connection', (socket) => {
+		global.io.sockets.on('connection', (socket) => {
 			let ipAddr = socket.handshake.address
 			socket.emit('control_status', config.get('allowControl'))
 
@@ -97,7 +96,7 @@ class API {
 	}
 
 	static sendControlStatus() {
-		io.sockets.emit('control_status', config.get('allowControl'))
+		global.io.sockets.emit('control_status', config.get('allowControl'))
 	}
 }
 

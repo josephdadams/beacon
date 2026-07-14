@@ -18,6 +18,8 @@ global.win = undefined
 global.DEVICES = []
 global.USB_DEVICES = 0
 
+global.io = null
+
 global.COLORS = config.get('colors')
 global.SOUNDS = config.get('sounds')
 

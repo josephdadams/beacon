@@ -233,24 +233,35 @@ function engageBeacon(beaconObj) {
 	if (config.get('allowControl')) {
 		for (let i = 0; i < global.DEVICES.length; i++) {
 			if (global.DEVICES[i].deviceId == beaconObj.deviceId || beaconObj.deviceId == 'all') {
+				//give each device its own copy so device-specific mutations (e.g. default color/speed, custom color conversion) don't leak into other devices when deviceId is 'all'
+				let deviceBeaconObj = { ...beaconObj }
+
 				switch (global.DEVICES[i].deviceType) {
 					case 'luxafor':
-						useLuxafor(global.DEVICES[i], beaconObj)
+						useLuxafor(global.DEVICES[i], deviceBeaconObj)
 						break
 					case 'blink1':
-						useBlink(global.DEVICES[i], beaconObj)
+						useBlink(global.DEVICES[i], deviceBeaconObj)
 						break
 					case 'busylight':
-						useBusylight(global.DEVICES[i], beaconObj)
+						useBusylight(global.DEVICES[i], deviceBeaconObj)
 						break
 					case 'screen':
-						useScreen(global.DEVICES[i], beaconObj)
+						useScreen(global.DEVICES[i], deviceBeaconObj)
 						break
 					default:
 						break
 				}
+
+				notifyBeaconUsage(deviceBeaconObj, global.DEVICES[i].deviceId)
 			}
 		}
+	}
+}
+
+function notifyBeaconUsage(beaconObj, deviceId) {
+	if (global.io) {
+		global.io.sockets.emit('beacon_usage', { beaconObj, deviceId })
 	}
 }
 
