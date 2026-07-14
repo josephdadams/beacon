@@ -98,3 +98,20 @@ Send a beacon object via `application/json` in a POST request to control beacon.
 ### socket.io: `error`:
 
 Emitted whenever there is an error. Contains the error message as a string.
+
+### socket.io: `beacon_usage`:
+
+Emitted whenever a beacon device is engaged via a `/beacon` request. Emitted once per affected device (a `device: 'all'` request emits one event per connected device). Contains the beacon object that was applied to that device, and the deviceId it was applied to.
+
+```javascript
+{
+	beaconObj: {
+		device: `deviceId` or 'all',
+		beaconType: `color/fade/flash/sound`,
+		color: `colorId`,
+		speed: speed (0-255),
+		...
+	},
+	deviceId: `deviceId`,
+}
+```

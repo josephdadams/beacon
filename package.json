@@ -8,7 +8,8 @@
 		"start": "electron .",
 		"format": "prettier -w .",
 		"lint:raw": "eslint --ext .ts --ext .js --ignore-pattern dist --ignore-pattern pkg",
-		"lint": "yarn lint:raw ."
+		"lint": "yarn lint:raw .",
+		"test": "node --test"
 	},
 	"build": {
 		"appId": "dev.josephadams.beacon",
